@@ -170,7 +170,7 @@ const DISCORD_MSG_LIMIT = 2000;
 const discordClient = new Discord.Client()
 discordClient.on('ready', () => {
     console.log(`Logged in as ${discordClient.user.tag}!`)
-    client.user.setActivity(`Használat: z!help`, { type: "LISTENING"});
+    discordClient.user.setActivity(`Használat: z!help`, { type: "LISTENING"});
 })
 discordClient.login(DISCORD_TOK)
 
