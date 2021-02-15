@@ -233,7 +233,7 @@ discordClient.on('message', async (msg) => {
                 if (val.voice_Connection) val.voice_Connection.disconnect()
                 if (val.musicYTStream) val.musicYTStream.destroy()
                     guildMap.delete(mapKey)
-                msg.reply("Lecsatlakozva.")
+                msg.reply("lecsatlakozva.")
             } else {
                 msg.reply("Nem sikerült a lecsatlakozás, mert nincs csatlakozva.")
             }
@@ -340,9 +340,9 @@ async function connect(msg, mapKey) {
             if (e) console.log(e);
             guildMap.delete(mapKey);
         })
-        msg.reply('connected!')
+        msg.reply('csatlakozva!')
     } catch (e) {
-        console.log('connect: ' + e)
+        console.log('csatlakozás: ' + e)
         msg.reply('Hiba: nem sikerült csatlakozni a hangcsatornába.');
         throw e;
     }
@@ -353,7 +353,7 @@ function speak_impl(voice_Connection, mapKey) {
         if (speaking.bitfield == 0 || user.bot) {
             return
         }
-        console.log(`I'm listening to ${user.username}`)
+        console.log(`A következőt hallgatom: ${user.username}`)
         // this creates a 16-bit signed PCM, stereo 48KHz stream
         const audioStream = voice_Connection.receiver.createStream(user, { mode: 'pcm' })
         audioStream.on('error',  (e) => { 
