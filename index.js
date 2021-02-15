@@ -91,7 +91,7 @@ function loadConfig() {
         SPOTIFY_TOKEN_SECRET = process.env.SPOTIFY_TOKEN_SECRET;
     }
     if (!DISCORD_TOK || !WITAPIKEY)
-        throw 'failed loading config #113 missing keys!'
+        throw 'Nem sikerült a config betöltése #113 hiányzó kulcsok!'
     
 }
 loadConfig()
@@ -219,12 +219,12 @@ discordClient.on('message', async (msg) => {
         const mapKey = msg.guild.id;
         if (msg.content.trim().toLowerCase() == _CMD_JOIN) {
             if (!msg.member.voice.channelID) {
-                msg.reply('Error: please join a voice channel first.')
+                msg.reply('Hiba: először csatlakozz egy hangcsatornába.')
             } else {
                 if (!guildMap.has(mapKey))
                     await connect(msg, mapKey)
                 else
-                    msg.reply('Already connected')
+                    msg.reply('Már csatlakozva')
             }
         } else if (msg.content.trim().toLowerCase() == _CMD_LEAVE) {
             if (guildMap.has(mapKey)) {
@@ -233,14 +233,14 @@ discordClient.on('message', async (msg) => {
                 if (val.voice_Connection) val.voice_Connection.disconnect()
                 if (val.musicYTStream) val.musicYTStream.destroy()
                     guildMap.delete(mapKey)
-                msg.reply("Disconnected.")
+                msg.reply("Lecsatlakozva.")
             } else {
-                msg.reply("Cannot leave because not connected.")
+                msg.reply("Nem sikerült a lecsatlakozás, mert nincs csatlakozva.")
             }
         }
         else if ( PLAY_CMDS.indexOf( msg.content.trim().toLowerCase().split('\n')[0].split(' ')[0] ) >= 0 ) {
             if (!msg.member.voice.channelID) {
-                msg.reply('Error: please join a voice channel first.')
+                msg.reply('Hiba: először csatlakozz egy hangcsatornába.')
             } else {
                 if (!guildMap.has(mapKey))
                     await connect(msg, mapKey)
@@ -269,7 +269,7 @@ discordClient.on('message', async (msg) => {
                 updateWitAIAppLang(x.id, lang, data => {
                   if ('success' in data)
                     msg.reply('succes!')
-                  else if ('error' in data && data.error !== 'Access token does not match')
+                  else if ('error' in data && data.error !== 'A hozzáférési token nem egyezik.')
                     msg.reply('Error: ' + data.error)
                 })
               }
@@ -277,15 +277,15 @@ discordClient.on('message', async (msg) => {
         }
     } catch (e) {
         console.log('discordClient message: ' + e)
-        msg.reply('Error#180: Something went wrong, try again or contact the developers if this keeps happening.');
+        msg.reply('Error#180: Hiba történt, próbálkozz újra, vagy fordulj a fejlesztőkhöz, ha ez továbbra is előfordul.');
     }
 })
 
 function getHelpString() {
-    let out = '**VOICE COMMANDS:**\n'
+    let out = '**HANG PARANCSOK:**\n'
         out += '```'
         out += 'music help\n'
-        out += 'music play [random, favorites, <genre> or query]\n'
+        out += 'music play [random, favorites, <műfaj> vagy lekérdezés]\n'
         out += 'music skip\n'
         out += 'music pause/resume\n'
         out += 'music shuffle\n'
@@ -296,12 +296,12 @@ function getHelpString() {
         out += 'music clear list\n';
         out += '```'
 
-        out += '**TEXT COMMANDS:**\n'
+        out += '**SZÖVEGES PARANCSOK:**\n'
         out += '```'
         out += _CMD_HELP + '\n'
         out += _CMD_JOIN + '/' + _CMD_LEAVE + '\n'
-        out += _CMD_PLAY + ' [query]\n'
-        out += _CMD_GENRE + ' [name]\n'
+        out += _CMD_PLAY + ' [lekérdezés]\n'
+        out += _CMD_GENRE + ' [név]\n'
         out += _CMD_RANDOM + '\n'
         out += _CMD_PAUSE + '/' + _CMD_RESUME + '\n'
         out += _CMD_SKIP + '\n'
@@ -321,7 +321,7 @@ async function connect(msg, mapKey) {
         let voice_Channel = await discordClient.channels.fetch(msg.member.voice.channelID);
         if (!voice_Channel) return msg.reply("Error: The voice channel does not exist!");
         let text_Channel = await discordClient.channels.fetch(msg.channel.id);
-        if (!text_Channel) return msg.reply("Error: The text channel does not exist!");
+        if (!text_Channel) return msg.reply("Hiba: A szövegcsatorna nem létezik!");
         let voice_Connection = await voice_Channel.join();
         voice_Connection.play('sound.mp3', { volume: 0.5 });
         guildMap.set(mapKey, {
@@ -343,7 +343,7 @@ async function connect(msg, mapKey) {
         msg.reply('connected!')
     } catch (e) {
         console.log('connect: ' + e)
-        msg.reply('Error: unable to join your voice channel.');
+        msg.reply('Hiba: nem sikerült csatlakozni a hangcsatornába.');
         throw e;
     }
 }
@@ -369,7 +369,7 @@ function speak_impl(voice_Connection, mapKey) {
             console.log("duration: " + duration)
 
             if (duration < 1.0 || duration > 19) { // 20 seconds max dur
-                console.log("TOO SHORT / TOO LONG; SKPPING")
+                console.log("TÚL RÖVID / TÚL HOSSZÚ; KIHAGYÁS")
                 return;
             }
 
@@ -426,7 +426,7 @@ function process_commands_query(query, mapKey, userid) {
                 out = _CMD_QUEUE;
                 break;
             case 'hello':
-                out = 'hello back =)'
+                out = 'Sziasztok, én Pistak22 vagyok.. =)'
                 break;
             case 'favorites':
                 out = _CMD_FAVORITES;
@@ -447,7 +447,7 @@ function process_commands_query(query, mapKey, userid) {
                         break;
                     case 'favorite':
                     case 'favorites':
-                        out = _CMD_PLAY + ' ' + 'favorites';
+                        out = _CMD_PLAY + ' ' + 'kedvencek';
                         break;
                     default:
                         for (let k of Object.keys(GENRES)) {
@@ -462,7 +462,7 @@ function process_commands_query(query, mapKey, userid) {
                 break;
         }
         if (out == null)
-            out = '<bad command: ' + query + '>';
+            out = '<rossz parancs: ' + query + '>';
     }
     if (out != null && out.length) {
         // out = '<@' + userid + '>, ' + out;
@@ -490,22 +490,22 @@ async function music_message(message, mapKey) {
                         }
                         message.react(EMOJI_GREEN_CIRCLE)
                     } else {
-                        message.channel.send('No favorites yet.')
+                        message.channel.send('Még nincsenek kedvencek.')
                     }
                 } else {
-                    message.channel.send('No favorites yet.')
+                    message.channel.send('Még nincsenek kedvencek.')
                 }
             }
             else if (isSpotify(qry)) {
                 try {
                     const arr = await spotify_tracks_from_playlist(qry);
-                    console.log(arr.length + ' spotify items from playlist')
+                    console.log(arr.length + ' spotify lejátszási lista elemek')
                     for (let item of arr)
                         addToQueue(item, mapKey);
                     message.react(EMOJI_GREEN_CIRCLE)
                 } catch(e) {
                     console.log('music_message 464:' + e)
-                    message.channel.send('Failed processing spotify link: ' + qry);
+                    message.channel.send('Spotify hivatkozás feldolgozása sikertelen: ' + qry);
                 }
             } else {
 
@@ -517,7 +517,7 @@ async function music_message(message, mapKey) {
                         message.react(EMOJI_GREEN_CIRCLE)
                     } catch (e) {
                         console.log('music_message 476:' + e)
-                        message.channel.send('Failed to process playlist: ' + qry);
+                        message.channel.send('Lejátszási lista feldolgozása sikertelen: ' + qry);
                     }
                 } else {
                     try {
@@ -525,7 +525,7 @@ async function music_message(message, mapKey) {
                         message.react(EMOJI_GREEN_CIRCLE)
                     } catch (e) {
                         console.log('music_message 484:' + e)
-                        message.channel.send('Failed to find video for (try again): ' + qry);
+                        message.channel.send('Nem található ilyen videó (próbáld újra később): ' + qry);
                     }
                 }
             }
@@ -588,12 +588,12 @@ async function music_message(message, mapKey) {
                     addToQueue(item, mapKey);
                 message.react(EMOJI_GREEN_CIRCLE)
             } else {
-                message.channel.send('no results for random');
+                message.channel.send('Nincs véletlenszerű eredmény.');
             }
 
         } else if (args[0] == _CMD_GENRES) {
 
-            let out = "------------ genres ------------\n";
+            let out = "------------ műfajok ------------\n";
             for (let g of Object.keys(GENRES)) {
                 out += g + '\n'
             }
@@ -613,13 +613,13 @@ async function music_message(message, mapKey) {
                     addToQueue(item, mapKey);
                 message.react(EMOJI_GREEN_CIRCLE)
             } else {
-                message.channel.send('no results for genre: ' + genre);
+                message.channel.send('Nincs eredmény ebben a műfajban: ' + genre);
             }
 
         } else if (args[0] == _CMD_FAVORITES) {
             const favs = getFavoritesString(mapKey);
             if (!(mapKey in GUILD_FAVORITES) || !GUILD_FAVORITES[mapKey].length)
-                message.channel.send('No favorites to play.')
+                message.channel.send('Nincsenek kedvencek.')
             else {
                 const chunks = message_chunking(favs, DISCORD_MSG_LIMIT);
                 for (let chunk of chunks)
@@ -650,7 +650,7 @@ async function music_message(message, mapKey) {
     
     queueTryPlayNext(mapKey, (title)=>{
         message.react(EMOJI_GREEN_CIRCLE);
-        message.channel.send('Now playing: **' + title + '**')
+        message.channel.send('Most szól: **' + title + '**')
     }, (msg)=>{
         if (msg && msg.length) message.channel.send(msg);
     });
@@ -675,7 +675,7 @@ load_guild_favorites();
 function setAsFavorite(mapKey, cbok, cberr) {
     let val = guildMap.get(mapKey);
     if (!val.currentPlayingTitle || !val.currentPlayingQuery)
-        cberr('Nothing playing at the moment.')
+        cberr('Jelenleg nincs lejátszás.')
     else {
         if (!(mapKey in GUILD_FAVORITES)) {
             GUILD_FAVORITES[mapKey] = [];
@@ -691,20 +691,20 @@ function unFavorite(qry, mapKey, cbok, cberr) {
         cberr('Invalid query.');
     else {
         if (!(mapKey in GUILD_FAVORITES)) {
-            cberr('No favorites.');
+            cberr('Nincsenek kedvencek.');
         } else {
             if (GUILD_FAVORITES[mapKey].includes(qry)) {
                 GUILD_FAVORITES[mapKey] = GUILD_FAVORITES[mapKey].filter(e => e !== qry); 
                 cbok()
             } else {
-                cberr('Favorite not found.');
+                cberr('Kedvenc nem található.');
             }
         }
     }
 }
 
 function getFavoritesString(mapKey) {
-    let out = "------------ favorites ------------\n";
+    let out = "------------ kedvencek ------------\n";
     if (mapKey in GUILD_FAVORITES) {
         let arr = GUILD_FAVORITES[mapKey];
         if (arr.length) {
@@ -748,7 +748,7 @@ function message_chunking(msg, MAXL) {
 
 function getQueueString(mapKey) {
     let val = guildMap.get(mapKey);
-    let _message = "------------ queue ------------\n";
+    let _message = "------------ várósor ------------\n";
     if (val.currentPlayingTitle != null)
         _message += '[X] ' + val.currentPlayingTitle + '\n';
     for (let i = 0; i < val.musicQueue.length; i++) {
@@ -795,7 +795,7 @@ async function queueTryPlayNext(mapKey, cbok, cberr) {
         val.musicDispatcher.on('error', (err) => {
             if (err) console.log('musicDispatcher error: ' + err);
             console.log(err)
-            cberr('Error playing <'+title+'>, try again?')
+            cberr('Hiba a lejátszás során <'+title+'>, újrapróbálkozás?')
             val.currentPlayingTitle = val.currentPlayingQuery = null;
             queueTryPlayNext(mapKey, cbok, cberr);
         });
@@ -805,7 +805,7 @@ async function queueTryPlayNext(mapKey, cbok, cberr) {
         
     } catch (e) {
         console.log('queueTryPlayNext: ' + e)
-        cberr('Error playing, try again?')
+        cberr('Hiba a lejátszás során, újrapróbálkozás?')
         if (typeof val !== 'undefined') {
             val.currentPlayingTitle = val.currentPlayingQuery = null;
             if (val.musicDispatcher) val.musicDispatcher.end();
@@ -817,7 +817,7 @@ async function queueTryPlayNext(mapKey, cbok, cberr) {
 function addToQueue(title, mapKey) {
     let val = guildMap.get(mapKey);
     if (val.currentPlayingTitle == title || val.currentPlayingQuery == title || val.musicQueue.includes(title)) {
-        console.log('duplicate prevented: ' + title)
+        console.log('Duplikáció megakadályozva: ' + title)
     } else {
         val.musicQueue.push(title);
     }
@@ -827,7 +827,7 @@ function addToQueue(title, mapKey) {
 function skipMusic(mapKey, cbok, cberr) {
     let val = guildMap.get(mapKey);
     if (!val.currentPlayingTitle) {
-        cberr('Nothing to skip');
+        cberr('Nincs mit átugrani');
     } else {
         if (val.musicDispatcher) val.musicDispatcher.end();
         cbok()
@@ -837,7 +837,7 @@ function skipMusic(mapKey, cbok, cberr) {
 function pauseMusic(mapKey, cbok, cberr) {
     let val = guildMap.get(mapKey);
     if (!val.currentPlayingTitle) {
-        cberr('Nothing to pause');
+        cberr('Nincs mit szüneteltetni.');
     } else {
         if (val.musicDispatcher) val.musicDispatcher.pause();
         cbok()
@@ -847,7 +847,7 @@ function pauseMusic(mapKey, cbok, cberr) {
 function resumeMusic(mapKey, cbok, cberr) {
     let val = guildMap.get(mapKey);
     if (!val.currentPlayingTitle) {
-        cberr('Nothing to resume');
+        cberr('Nincs mit folytatni.');
     } else {
         if (val.musicDispatcher) val.musicDispatcher.resume();
         cbok()
